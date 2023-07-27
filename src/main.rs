@@ -1,5 +1,5 @@
 use ggez::{ Context, ContextBuilder, GameResult };
-use ggez::graphics::{ Color, Canvas, Rect, DrawMode, Mesh, FillOptions, DrawParam, InstanceArray, Image };
+use ggez::graphics::{ Color, Canvas, Rect, DrawMode, Mesh, FillOptions, DrawParam };
 use ggez::event::{ EventHandler };
 use ggez::event;
 use ggez::conf::WindowMode;
