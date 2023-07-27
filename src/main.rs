@@ -1,23 +1,23 @@
-use ggez::{ Context, ContextBuilder, GameResult };
-use ggez::graphics::{ Color, Canvas, Rect, DrawMode, Mesh, FillOptions, DrawParam };
-use ggez::event::{ EventHandler };
-use ggez::event;
 use ggez::conf::WindowMode;
+use ggez::event;
+use ggez::event::EventHandler;
+use ggez::graphics::{Canvas, Color, DrawMode, DrawParam, FillOptions, Mesh, Rect};
 use ggez::input::keyboard::KeyCode;
+use ggez::{Context, ContextBuilder, GameResult};
 use rand::Rng;
 
 enum Side {
     Left,
     Right,
     Up,
-    Down
+    Down,
 }
 
 struct Player {
     x1: f32,
     y1: f32,
     width: f32,
-    height: f32
+    height: f32,
 }
 
 struct Ball {
@@ -25,26 +25,41 @@ struct Ball {
     y: f32,
     r: f32,
     x_speed: f32,
-    y_speed: f32
+    y_speed: f32,
 }
 
 impl Ball {
     pub fn new(window_size: (f32, f32)) -> Self {
         let radius: f32 = 20.0;
         let mut rng = rand::thread_rng();
-        let (x_speed, y_speed) = ((3 * (rng.gen::<bool>() as i32 * 2 - 1)) as f32,  (rng.gen::<f32>() - 0.5) * 10.0);
-        let (x, y) = (
-            (window_size.0 - radius) / 2.0, 
-            (window_size.1 - radius) / 2.0
+        let (x_speed, y_speed) = (
+            (3 * (rng.gen::<bool>() as i32 * 2 - 1)) as f32,
+            (rng.gen::<f32>() - 0.5) * 10.0,
         );
-        
-        Ball { x : x, y : y, r : radius, x_speed : x_speed, y_speed : y_speed }
+        let (x, y) = (
+            (window_size.0 - radius) / 2.0,
+            (window_size.1 - radius) / 2.0,
+        );
+
+        Ball {
+            x: x,
+            y: y,
+            r: radius,
+            x_speed: x_speed,
+            y_speed: y_speed,
+        }
     }
 
     fn screen_collision(&mut self, window_size: (f32, f32)) -> Result<Side, ()> {
-        if self.y < 0.0 || self.y + self.r > window_size.1 { self.y_speed *= -1.0; }
-        if self.x + self.r < 0.0 { return Ok(Side::Right); }
-        if self.x > window_size.0 { return Ok(Side::Left); }
+        if self.y < 0.0 || self.y + self.r > window_size.1 {
+            self.y_speed *= -1.0;
+        }
+        if self.x + self.r < 0.0 {
+            return Ok(Side::Right);
+        }
+        if self.x > window_size.0 {
+            return Ok(Side::Left);
+        }
 
         Err(())
     }
@@ -74,32 +89,40 @@ impl Player {
                 x = size_window.0 - w;
             }
 
-            _ => { return Err(()); } 
+            _ => {
+                return Err(());
+            }
         }
 
-        Ok(Player { x1 : x, y1 : y, height : h, width : w })
+        Ok(Player {
+            x1: x,
+            y1: y,
+            height: h,
+            width: w,
+        })
     }
 
     fn move_up(&mut self, speed: f32) {
-        if self.y1 > speed { 
-            self.y1 -= speed; 
-        } else { self.y1 = 0.; }
+        if self.y1 > speed {
+            self.y1 -= speed;
+        } else {
+            self.y1 = 0.;
+        }
     }
 
     fn move_down(&mut self, speed: f32, window_y: f32) {
-        if  self.y1 + 
-            self.height + 
-            speed
-            > window_y { 
-                self.y1 = window_y - self.height;
-        } else { self.y1 += speed; }
+        if self.y1 + self.height + speed > window_y {
+            self.y1 = window_y - self.height;
+        } else {
+            self.y1 += speed;
+        }
     }
 
     pub fn y_move(&mut self, side: Side, speed: f32, window_y: f32) {
         match side {
             Side::Up => self.move_up(speed),
             Side::Down => self.move_down(speed, window_y),
-            _ => todo!()
+            _ => todo!(),
         }
     }
 }
@@ -107,7 +130,7 @@ impl Player {
 struct MyGame {
     player1: Player,
     player2: Player,
-    ball: Ball
+    ball: Ball,
 }
 
 impl MyGame {
@@ -119,7 +142,7 @@ impl MyGame {
         MyGame {
             player1: Player::new(Side::Left, window_size).unwrap(),
             player2: Player::new(Side::Right, window_size).unwrap(),
-            ball: Ball::new(window_size)
+            ball: Ball::new(window_size),
         }
     }
 }
@@ -128,10 +151,7 @@ impl EventHandler for MyGame {
     fn update(&mut self, _ctx: &mut Context) -> GameResult {
         let speed_players = 4.;
 
-        let (window_x, window_y) = (
-            WindowMode::default().width,
-            WindowMode::default().height
-        );
+        let (window_x, window_y) = (WindowMode::default().width, WindowMode::default().height);
         let window_size = (window_x, window_y);
 
         let move_keys = Vec::from([KeyCode::W, KeyCode::S, KeyCode::Up, KeyCode::Down]);
@@ -142,18 +162,18 @@ impl EventHandler for MyGame {
                     1 => self.player1.y_move(Side::Down, speed_players, window_y),
                     2 => self.player2.y_move(Side::Up, speed_players, window_y),
                     3 => self.player2.y_move(Side::Down, speed_players, window_y),
-                    _ => todo!()
+                    _ => todo!(),
                 }
             }
         }
-        
+
         let result = self.ball.update(window_size);
         match result {
             Ok(Side::Left) => self.ball = Ball::new(window_size),
             Ok(Side::Right) => self.ball = Ball::new(window_size),
             _ => (),
         }
-        
+
         Ok(())
     }
 
@@ -161,46 +181,45 @@ impl EventHandler for MyGame {
         let mut canvas = Canvas::from_frame(ctx, Color::BLACK);
 
         let player1 = Mesh::new_rectangle(
-            ctx, 
-            DrawMode::Fill(FillOptions::DEFAULT), 
-            Rect { 
-                x : self.player1.x1, y : self.player1.y1, 
-                w : self.player1.width, h : self.player1.height 
-            }, 
-            Color::WHITE
-        ).unwrap();
+            ctx,
+            DrawMode::Fill(FillOptions::DEFAULT),
+            Rect {
+                x: self.player1.x1,
+                y: self.player1.y1,
+                w: self.player1.width,
+                h: self.player1.height,
+            },
+            Color::WHITE,
+        )
+        .unwrap();
         let player2 = Mesh::new_rectangle(
-            ctx, 
-            DrawMode::Fill(FillOptions::DEFAULT), 
-            Rect { 
-                x : self.player2.x1, y : self.player2.y1, 
-                w : self.player2.width, h : self.player2.height 
-            }, 
-            Color::WHITE
-        ).unwrap();
+            ctx,
+            DrawMode::Fill(FillOptions::DEFAULT),
+            Rect {
+                x: self.player2.x1,
+                y: self.player2.y1,
+                w: self.player2.width,
+                h: self.player2.height,
+            },
+            Color::WHITE,
+        )
+        .unwrap();
         let ball = Mesh::new_rectangle(
-            ctx, 
-            DrawMode::Fill(FillOptions::DEFAULT), 
-            Rect { 
-                x : self.ball.x, y : self.ball.y, 
-                w : self.ball.r, h : self.ball.r 
-            }, 
-            Color::WHITE
-        ).unwrap();
+            ctx,
+            DrawMode::Fill(FillOptions::DEFAULT),
+            Rect {
+                x: self.ball.x,
+                y: self.ball.y,
+                w: self.ball.r,
+                h: self.ball.r,
+            },
+            Color::WHITE,
+        )
+        .unwrap();
 
-
-        canvas.draw(
-            &player1,
-            DrawParam::new()
-        );
-        canvas.draw(
-            &player2,
-            DrawParam::new()
-        );
-        canvas.draw(
-            &ball,
-            DrawParam::new()
-        );
+        canvas.draw(&player1, DrawParam::new());
+        canvas.draw(&player2, DrawParam::new());
+        canvas.draw(&ball, DrawParam::new());
 
         canvas.finish(ctx)
     }
