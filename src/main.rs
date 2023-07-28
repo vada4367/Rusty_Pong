@@ -6,6 +6,7 @@ use ggez::input::keyboard::KeyCode;
 use ggez::{Context, ContextBuilder, GameResult};
 use rand::Rng;
 
+#[derive(PartialEq)]
 enum Side {
     Left,
     Right,
@@ -18,6 +19,7 @@ struct Player {
     y1: f32,
     width: f32,
     height: f32,
+    side: Side,
 }
 
 struct Ball {
@@ -63,12 +65,13 @@ impl Ball {
 
         Err(())
     }
-
+    
     pub fn update(&mut self, window_size: (f32, f32)) -> Result<Side, ()> {
         let sc_result = self.screen_collision(window_size);
+        
         self.x += self.x_speed;
         self.y += self.y_speed;
-
+        
         sc_result
     }
 }
@@ -99,6 +102,7 @@ impl Player {
             y1: y,
             height: h,
             width: w,
+            side: side,
         })
     }
 
@@ -124,6 +128,29 @@ impl Player {
             Side::Down => self.move_down(speed, window_y),
             _ => todo!(),
         }
+    }
+
+    fn direct_collision(&self, ball: &mut Ball) {
+        if ((self.side == Side::Left && self.x1 + self.width > ball.x) || 
+           (self.side == Side::Right && self.x1 < ball.x + ball.r)) && 
+            (self.y1 < ball.y && self.y1 + self.height > ball.y + ball.r) 
+                { ball.x_speed *= -1.0; }
+    }
+
+    fn corner_collision(&self, ball: &mut Ball) {
+        if self.y1 < ball.y {
+            match self.side {
+                Side::Left {
+                    if self.x1 + self.width > ball.x {
+                        TODO!();
+                    } 
+                }
+            }
+        }
+    }
+
+    pub fn collision(&self, ball: &mut Ball) {
+        self.direct_collision(ball);
     }
 }
 
@@ -169,10 +196,13 @@ impl EventHandler for MyGame {
 
         let result = self.ball.update(window_size);
         match result {
-            Ok(Side::Left) => self.ball = Ball::new(window_size),
-            Ok(Side::Right) => self.ball = Ball::new(window_size),
+            Ok(Side::Left) => *self = Self::new(_ctx),
+            Ok(Side::Right) => *self = Self::new(_ctx),
             _ => (),
         }
+
+        self.player1.collision(&mut self.ball);
+        self.player2.collision(&mut self.ball);
 
         Ok(())
     }
