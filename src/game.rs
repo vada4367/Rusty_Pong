@@ -101,12 +101,12 @@ impl EventHandler for MyGame {
                 if self.player1.collision(&mut self.ball) == Ok(()) {
                     self.expected_collision = Side::Right;
                 }
-            },
+            }
             Side::Right => {
                 if self.player2.collision(&mut self.ball) == Ok(()) {
                     self.expected_collision = Side::Left;
                 }
-            },
+            }
             _ => {
                 if self.player1.collision(&mut self.ball) == Ok(()) {
                     self.expected_collision = Side::Right;

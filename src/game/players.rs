@@ -174,7 +174,7 @@ impl Player {
         }
     }
 
-    pub fn collision(&self, ball: &mut Ball) -> Result<(), ()>{
+    pub fn collision(&self, ball: &mut Ball) -> Result<(), ()> {
         let corn_res = self.corner_collision(ball);
         let mut dir_res = Err(());
 
