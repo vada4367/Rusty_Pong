@@ -65,13 +65,15 @@ impl Player {
         }
     }
 
-    fn direct_collision(&self, ball: &mut Ball) {
+    fn direct_collision(&self, ball: &mut Ball) -> Result<(), ()> {
         if ((self.side == Side::Left && self.x1 + self.width > ball.x)
             || (self.side == Side::Right && self.x1 < ball.x + ball.r))
             && (self.y1 < ball.y && self.y1 + self.height > ball.y + ball.r)
         {
             ball.x_speed *= -1.0;
+            return Ok(());
         }
+        Err(())
     }
 
     fn corner_collision(&self, ball: &mut Ball) -> Result<(), ()> {
@@ -84,15 +86,15 @@ impl Player {
             Side::Left => {
                 if self.x1 + self.width > ball.x && self.x1 < ball.x && down_side {
                     let ball_corn =
-                        ((ball.y - ball_prev_frame.1) / (ball.x - ball_prev_frame.0)).atan();
+                        ((ball_prev_frame.1 - ball.y) / (ball_prev_frame.0 - ball.x)).atan();
                     let in_corn =
-                        ((ball.y - self.y1 - self.height) / (ball.x - self.x1 - self.width)).atan();
+                        ((self.y1 + self.height - ball.y) / (self.x1 + self.width - ball.x)).atan();
 
-                    if ball_corn < in_corn {
-                        ball.x_speed *= -1.0;
-                    }
                     if ball_corn > in_corn {
                         ball.y_speed *= -1.0;
+                    }
+                    if ball_corn < in_corn {
+                        ball.x_speed *= -1.0;
                     }
                     if ball_corn == in_corn {
                         ball.x_speed *= -1.0;
@@ -104,15 +106,15 @@ impl Player {
 
                 if self.x1 + self.width > ball.x && self.x1 < ball.x && up_side {
                     let ball_corn =
-                        ((ball.y - ball_prev_frame.1) / (ball.x - ball_prev_frame.0)).atan();
+                        ((ball.y - ball_prev_frame.1) / (ball_prev_frame.0 - ball.x)).atan();
                     let in_corn =
-                        ((self.y1 - (ball.y + ball.r)) / (self.x1 + self.width - ball.x)).atan();
+                        ((ball.y + ball.r - self.y1) / (self.x1 + self.width - ball.x)).atan();
 
                     if ball_corn > in_corn {
-                        ball.x_speed *= -1.0;
+                        ball.y_speed *= -1.0;
                     }
                     if ball_corn < in_corn {
-                        ball.y_speed *= -1.0;
+                        ball.x_speed *= -1.0;
                     }
                     if ball_corn == in_corn {
                         ball.x_speed *= -1.0;
@@ -128,15 +130,15 @@ impl Player {
                 if self.x1 < ball.x + ball.r && self.x1 + self.width > ball.x + ball.r && down_side
                 {
                     let ball_corn =
-                        ((ball.y - ball_prev_frame.1) / (ball.x - ball_prev_frame.0)).atan();
+                        ((ball_prev_frame.1 - ball.y) / (ball.x - ball_prev_frame.0)).atan();
                     let in_corn =
-                        ((ball.y - self.y1 - self.height) / (ball.x - self.x1 - self.width)).atan();
+                        ((self.y1 + self.height - ball.y) / (ball.x + ball.r - self.x1)).atan();
 
                     if ball_corn > in_corn {
-                        ball.x_speed *= -1.0;
+                        ball.y_speed *= -1.0;
                     }
                     if ball_corn < in_corn {
-                        ball.y_speed *= -1.0;
+                        ball.x_speed *= -1.0;
                     }
                     if ball_corn == in_corn {
                         ball.x_speed *= -1.0;
@@ -150,13 +152,13 @@ impl Player {
                     let ball_corn =
                         ((ball.y - ball_prev_frame.1) / (ball.x - ball_prev_frame.0)).atan();
                     let in_corn =
-                        ((self.y1 - (ball.y + ball.r)) / (self.x1 + self.width - ball.x)).atan();
+                        ((ball.x + ball.r - self.y1) / (ball.x + ball.r - self.x1)).atan();
 
-                    if ball_corn < in_corn {
-                        ball.x_speed *= -1.0;
-                    }
                     if ball_corn > in_corn {
                         ball.y_speed *= -1.0;
+                    }
+                    if ball_corn < in_corn {
+                        ball.x_speed *= -1.0;
                     }
                     if ball_corn == in_corn {
                         ball.x_speed *= -1.0;
@@ -172,12 +174,20 @@ impl Player {
         }
     }
 
-    pub fn collision(&self, ball: &mut Ball) {
-        let result = self.corner_collision(ball);
-        match result {
+    pub fn collision(&self, ball: &mut Ball) -> Result<(), ()>{
+        let corn_res = self.corner_collision(ball);
+        let mut dir_res = Err(());
+
+        match corn_res {
             Ok(()) => (),
-            Err(()) => self.direct_collision(ball),
+            Err(()) => dir_res = self.direct_collision(ball),
         }
+
+        if dir_res == Ok(()) || corn_res == Ok(()) {
+            return Ok(());
+        }
+
+        Err(())
     }
 
     pub fn bot_move(&mut self, ball: &Ball, window_y: f32) {

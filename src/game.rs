@@ -36,6 +36,7 @@ pub struct MyGame {
     player2: Player,
     ball: Ball,
     score: Score,
+    expected_collision: Side,
 }
 
 impl MyGame {
@@ -49,6 +50,7 @@ impl MyGame {
             player2: Player::new(Side::Right, window_size, false).unwrap(),
             ball: Ball::new(window_size),
             score: Score::new(),
+            expected_collision: Side::Up,
         }
     }
 
@@ -56,6 +58,7 @@ impl MyGame {
         self.player1 = Player::new(Side::Left, window_size, true).unwrap();
         self.player2 = Player::new(Side::Right, window_size, false).unwrap();
         self.ball = Ball::new(window_size);
+        self.expected_collision = Side::Up;
     }
 }
 
@@ -93,8 +96,27 @@ impl EventHandler for MyGame {
             _ => (),
         }
 
-        self.player1.collision(&mut self.ball);
-        self.player2.collision(&mut self.ball);
+        match self.expected_collision {
+            Side::Left => {
+                if self.player1.collision(&mut self.ball) == Ok(()) {
+                    self.expected_collision = Side::Right;
+                }
+            },
+            Side::Right => {
+                if self.player2.collision(&mut self.ball) == Ok(()) {
+                    self.expected_collision = Side::Left;
+                }
+            },
+            _ => {
+                if self.player1.collision(&mut self.ball) == Ok(()) {
+                    self.expected_collision = Side::Right;
+                }
+                if self.player2.collision(&mut self.ball) == Ok(()) {
+                    self.expected_collision = Side::Left;
+                }
+            }
+        }
+
         self.player1.bot_move(&self.ball, window_y);
         self.player2.bot_move(&self.ball, window_y);
         self.ball.x_speed *= 1.001;
