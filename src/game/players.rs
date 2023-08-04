@@ -82,8 +82,8 @@ impl Player {
 
         let ball_prev_frame: (f32, f32) = (ball.x - ball.x_speed, ball.y - ball.y_speed);
 
-        match self.side {
-            Side::Left => {
+        match ball.x_speed < 0.0 && ball.x_speed != 0.0 {
+            true => {
                 if self.x1 + self.width > ball.x && self.x1 < ball.x && down_side {
                     let ball_corn =
                         ((ball_prev_frame.1 - ball.y) / (ball_prev_frame.0 - ball.x)).atan();
@@ -126,7 +126,8 @@ impl Player {
 
                 return Err(());
             }
-            Side::Right => {
+
+            false => {
                 if self.x1 < ball.x + ball.r && self.x1 + self.width > ball.x + ball.r && down_side
                 {
                     let ball_corn =
@@ -148,7 +149,7 @@ impl Player {
                     return Ok(());
                 }
 
-                if self.x1 < ball.x + ball.r && up_side {
+                if self.x1 < ball.x + ball.r && self.x1 + self.width > ball.x + ball.r && up_side {
                     let ball_corn =
                         ((ball.y - ball_prev_frame.1) / (ball.x - ball_prev_frame.0)).atan();
                     let in_corn =
@@ -170,7 +171,6 @@ impl Player {
 
                 return Err(());
             }
-            _ => return Err(()),
         }
     }
 
