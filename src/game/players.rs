@@ -82,96 +82,79 @@ impl Player {
 
         let ball_prev_frame: (f32, f32) = (ball.x - ball.x_speed, ball.y - ball.y_speed);
 
-        match ball.x_speed < 0.0 && ball.x_speed != 0.0 {
-            true => {
-                if self.x1 + self.width > ball.x && self.x1 < ball.x && down_side {
-                    let ball_corn =
-                        ((ball_prev_frame.1 - ball.y) / (ball_prev_frame.0 - ball.x)).atan();
-                    let in_corn =
-                        ((self.y1 + self.height - ball.y) / (self.x1 + self.width - ball.x)).atan();
+        if self.x1 + self.width > ball.x && self.x1 < ball.x && down_side {
+            let ball_corn = ((ball_prev_frame.1 - ball.y) / (ball_prev_frame.0 - ball.x)).atan();
+            let in_corn =
+                ((self.y1 + self.height - ball.y) / (self.x1 + self.width - ball.x)).atan();
 
-                    if ball_corn > in_corn {
-                        ball.y_speed *= -1.0;
-                    }
-                    if ball_corn < in_corn {
-                        ball.x_speed *= -1.0;
-                    }
-                    if ball_corn == in_corn {
-                        ball.x_speed *= -1.0;
-                        ball.y_speed *= -1.0;
-                    }
-
-                    return Ok(());
-                }
-
-                if self.x1 + self.width > ball.x && self.x1 < ball.x && up_side {
-                    let ball_corn =
-                        ((ball.y - ball_prev_frame.1) / (ball_prev_frame.0 - ball.x)).atan();
-                    let in_corn =
-                        ((ball.y + ball.r - self.y1) / (self.x1 + self.width - ball.x)).atan();
-
-                    if ball_corn > in_corn {
-                        ball.y_speed *= -1.0;
-                    }
-                    if ball_corn < in_corn {
-                        ball.x_speed *= -1.0;
-                    }
-                    if ball_corn == in_corn {
-                        ball.x_speed *= -1.0;
-                        ball.y_speed *= -1.0;
-                    }
-
-                    return Ok(());
-                }
-
-                return Err(());
+            if ball_corn > in_corn {
+                ball.y_speed *= -1.0;
+            }
+            if ball_corn < in_corn {
+                ball.x_speed *= -1.0;
+            }
+            if ball_corn == in_corn {
+                ball.x_speed *= -1.0;
+                ball.y_speed *= -1.0;
             }
 
-            false => {
-                if self.x1 < ball.x + ball.r && self.x1 + self.width > ball.x + ball.r && down_side
-                {
-                    let ball_corn =
-                        ((ball_prev_frame.1 - ball.y) / (ball.x - ball_prev_frame.0)).atan();
-                    let in_corn =
-                        ((self.y1 + self.height - ball.y) / (ball.x + ball.r - self.x1)).atan();
-
-                    if ball_corn > in_corn {
-                        ball.y_speed *= -1.0;
-                    }
-                    if ball_corn < in_corn {
-                        ball.x_speed *= -1.0;
-                    }
-                    if ball_corn == in_corn {
-                        ball.x_speed *= -1.0;
-                        ball.y_speed *= -1.0;
-                    }
-
-                    return Ok(());
-                }
-
-                if self.x1 < ball.x + ball.r && self.x1 + self.width > ball.x + ball.r && up_side {
-                    let ball_corn =
-                        ((ball.y - ball_prev_frame.1) / (ball.x - ball_prev_frame.0)).atan();
-                    let in_corn =
-                        ((ball.x + ball.r - self.y1) / (ball.x + ball.r - self.x1)).atan();
-
-                    if ball_corn > in_corn {
-                        ball.y_speed *= -1.0;
-                    }
-                    if ball_corn < in_corn {
-                        ball.x_speed *= -1.0;
-                    }
-                    if ball_corn == in_corn {
-                        ball.x_speed *= -1.0;
-                        ball.y_speed *= -1.0;
-                    }
-
-                    return Ok(());
-                }
-
-                return Err(());
-            }
+            return Ok(());
         }
+
+        if self.x1 + self.width > ball.x && self.x1 < ball.x && up_side {
+            let ball_corn = ((ball.y - ball_prev_frame.1) / (ball_prev_frame.0 - ball.x)).atan();
+            let in_corn = ((ball.y + ball.r - self.y1) / (self.x1 + self.width - ball.x)).atan();
+
+            if ball_corn > in_corn {
+                ball.y_speed *= -1.0;
+            }
+            if ball_corn < in_corn {
+                ball.x_speed *= -1.0;
+            }
+            if ball_corn == in_corn {
+                ball.x_speed *= -1.0;
+                ball.y_speed *= -1.0;
+            }
+
+            return Ok(());
+        }
+        if self.x1 < ball.x + ball.r && self.x1 + self.width > ball.x + ball.r && down_side {
+            let ball_corn = ((ball_prev_frame.1 - ball.y) / (ball.x - ball_prev_frame.0)).atan();
+            let in_corn = ((self.y1 + self.height - ball.y) / (ball.x + ball.r - self.x1)).atan();
+
+            if ball_corn > in_corn {
+                ball.y_speed *= -1.0;
+            }
+            if ball_corn < in_corn {
+                ball.x_speed *= -1.0;
+            }
+            if ball_corn == in_corn {
+                ball.x_speed *= -1.0;
+                ball.y_speed *= -1.0;
+            }
+
+            return Ok(());
+        }
+
+        if self.x1 < ball.x + ball.r && self.x1 + self.width > ball.x + ball.r && up_side {
+            let ball_corn = ((ball.y - ball_prev_frame.1) / (ball.x - ball_prev_frame.0)).atan();
+            let in_corn = ((ball.x + ball.r - self.y1) / (ball.x + ball.r - self.x1)).atan();
+
+            if ball_corn > in_corn {
+                ball.y_speed *= -1.0;
+            }
+            if ball_corn < in_corn {
+                ball.x_speed *= -1.0;
+            }
+            if ball_corn == in_corn {
+                ball.x_speed *= -1.0;
+                ball.y_speed *= -1.0;
+            }
+
+            return Ok(());
+        }
+
+        return Err(());
     }
 
     pub fn collision(&self, ball: &mut Ball) -> Result<(), ()> {
